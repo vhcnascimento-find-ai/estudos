@@ -24,18 +24,23 @@ if audio_file:
     output_audio = "converted_audio.wav"
     
     # Lê o arquivo .ogg e escreve como .wav
-    data, samplerate = sf.read(input_audio)
-    sf.write(output_audio, data, samplerate)
-    
-    st.success("Arquivo convertido para .wav com sucesso!")
+    try:
+        data, samplerate = sf.read(input_audio)
+        sf.write(output_audio, data, samplerate)
+        st.success("Arquivo convertido para .wav com sucesso!")
+    except Exception as e:
+        st.error(f"Erro ao converter o arquivo de áudio: {e}")
     
     # Verifica se o arquivo .wav foi salvo corretamente
     if os.path.exists(output_audio):
         # Transcreve o áudio usando o modelo Whisper
-        result = model.transcribe(output_audio)
-        texto_transcrito = result["text"]
-        
-        # Exibe o texto transcrito na tela
-        st.text_area("Texto Transcrito", texto_transcrito, height=350)
+        try:
+            result = model.transcribe(output_audio)
+            texto_transcrito = result["text"]
+            
+            # Exibe o texto transcrito na tela
+            st.text_area("Texto Transcrito", texto_transcrito, height=350)
+        except Exception as e:
+            st.error(f"Erro ao transcrever o áudio: {e}")
     else:
         st.error("Erro ao converter o arquivo de áudio para .wav.")
