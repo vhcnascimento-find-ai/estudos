@@ -2,9 +2,17 @@ import streamlit as st
 import whisper
 from pydub import AudioSegment
 import imageio_ffmpeg as ffmpeg
+import os
 
 # Configura o pydub para usar o ffmpeg do imageio-ffmpeg
-AudioSegment.converter = ffmpeg.get_ffmpeg_exe()
+ffmpeg_path = ffmpeg.get_ffmpeg_exe()
+AudioSegment.converter = ffmpeg_path
+
+# Verifica se o ffmpeg está configurado corretamente
+if not os.path.isfile(ffmpeg_path):
+    st.error("FFmpeg não encontrado. Verifique a instalação do FFmpeg.")
+else:
+    st.success("FFmpeg configurado corretamente.")
 
 st.title('Transcrição de áudio')
 
