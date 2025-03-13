@@ -27,4 +27,4 @@ if audio_file_wav:
             texto_transcrito = f"Erro na solicitação ao serviço de reconhecimento de fala: {e}"
     
     # Exibe o texto transcrito na tela
-    st.text_area("Texto Transcrito", texto_transcrito, height=350)
+    st.text_area("Texto Transcrito", texto_transcrito, height=300)
