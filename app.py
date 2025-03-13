@@ -1,8 +1,12 @@
 import streamlit as st
+import whisper
 import soundfile as sf
 import os
 
-st.title('Reprodução e Conversão de Áudio')
+st.title('Reprodução e Transcrição de Áudio')
+
+# Carrega o modelo Whisper
+model = whisper.load_model("small")  # Você pode escolher outros modelos como 'small', 'medium', 'large'
 
 # Adiciona um botão para upload de um único arquivo de áudio .ogg
 audio_file = st.file_uploader("Anexe um arquivo de áudio .ogg", type=["ogg"])
@@ -25,14 +29,9 @@ if audio_file:
     
     st.success("Arquivo convertido para .wav com sucesso!")
     
-    # Exibe o áudio convertido
-    st.audio(output_audio, format='audio/wav')
+    # Transcreve o áudio usando o modelo Whisper
+    result = model.transcribe(output_audio)
+    texto_transcrito = result["text"]
     
-    # Permite que o usuário baixe o arquivo .wav convertido
-    with open(output_audio, "rb") as file:
-        st.download_button(
-            label="Baixar áudio convertido",
-            data=file,
-            file_name=output_audio,
-            mime="audio/wav"
-        )
+    # Exibe o texto transcrito na tela
+    st.text_area("Texto Transcrito", texto_transcrito, height=350)
