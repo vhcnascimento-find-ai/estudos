@@ -29,9 +29,13 @@ if audio_file:
     
     st.success("Arquivo convertido para .wav com sucesso!")
     
-    # Transcreve o áudio usando o modelo Whisper
-    result = model.transcribe(output_audio)
-    texto_transcrito = result["text"]
-    
-    # Exibe o texto transcrito na tela
-    st.text_area("Texto Transcrito", texto_transcrito, height=350)
+    # Verifica se o arquivo .wav foi salvo corretamente
+    if os.path.exists(output_audio):
+        # Transcreve o áudio usando o modelo Whisper
+        result = model.transcribe(output_audio)
+        texto_transcrito = result["text"]
+        
+        # Exibe o texto transcrito na tela
+        st.text_area("Texto Transcrito", texto_transcrito, height=350)
+    else:
+        st.error("Erro ao converter o arquivo de áudio para .wav.")
