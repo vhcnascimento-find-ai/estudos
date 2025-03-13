@@ -1,11 +1,8 @@
 import streamlit as st
-import whisper
+import speech_recognition as sr
 import os
 
 st.title('Reprodução e Transcrição de Áudio .wav')
-
-# Carrega o modelo Whisper
-model = whisper.load_model("small")  # Você pode escolher outros modelos como 'small', 'medium', 'large'
 
 # Adiciona um botão para upload de um único arquivo de áudio .wav
 audio_file_wav = st.file_uploader("Anexe um arquivo de áudio .wav", type=["wav"])
@@ -18,9 +15,16 @@ if audio_file_wav:
     with open("uploaded_audio.wav", "wb") as f:
         f.write(audio_file_wav.getbuffer())
     
-    # Transcreve o áudio usando o modelo Whisper
-    result = model.transcribe("uploaded_audio.wav")
-    texto_transcrito = result["text"]
+    # Transcreve o áudio usando a biblioteca SpeechRecognition
+    recognizer = sr.Recognizer()
+    with sr.AudioFile("uploaded_audio.wav") as source:
+        audio_data = recognizer.record(source)
+        try:
+            texto_transcrito = recognizer.recognize_google(audio_data, language="pt-BR")
+        except sr.UnknownValueError:
+            texto_transcrito = "Não foi possível transcrever o áudio."
+        except sr.RequestError as e:
+            texto_transcrito = f"Erro na solicitação ao serviço de reconhecimento de fala: {e}"
     
     # Exibe o texto transcrito na tela
     st.text_area("Texto Transcrito", texto_transcrito, height=350)
