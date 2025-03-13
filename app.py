@@ -26,8 +26,12 @@ if audio_file:
     st.write(f"Arquivo enviado: {audio_file.name}")
     st.audio(audio_file, format='audio/ogg')
     
+    # Salva o arquivo de áudio enviado
+    with open("uploaded_audio.ogg", "wb") as f:
+        f.write(audio_file.getbuffer())
+    
     # Converte o arquivo de áudio para .wav
-    sound = AudioSegment.from_ogg(audio_file)
+    sound = AudioSegment.from_ogg("uploaded_audio.ogg")
     sound.export("audio.wav", format="wav")
     
     # Transcreve o áudio usando o modelo Whisper
