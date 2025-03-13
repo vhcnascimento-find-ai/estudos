@@ -1,5 +1,5 @@
 import streamlit as st
-from pydub import AudioSegment
+import ffmpeg
 import os
 
 st.title('Reprodução e Conversão de Áudio')
@@ -15,20 +15,21 @@ if audio_file:
     with open("uploaded_audio.ogg", "wb") as f:
         f.write(audio_file.getbuffer())
     
-    # Converte o arquivo de áudio para .wav
-    sound = AudioSegment.from_file("uploaded_audio.ogg", format="ogg")
-    sound.export("converted_audio.wav", format="wav")
+    # Converte o arquivo de áudio para .wav usando ffmpeg-python
+    input_audio = "uploaded_audio.ogg"
+    output_audio = "converted_audio.wav"
+    ffmpeg.input(input_audio).output(output_audio).run()
     
     st.success("Arquivo convertido para .wav com sucesso!")
     
     # Exibe o áudio convertido
-    st.audio("converted_audio.wav", format='audio/wav')
+    st.audio(output_audio, format='audio/wav')
     
     # Permite que o usuário baixe o arquivo .wav convertido
-    with open("converted_audio.wav", "rb") as file:
+    with open(output_audio, "rb") as file:
         st.download_button(
             label="Baixar áudio convertido",
             data=file,
-            file_name="converted_audio.wav",
+            file_name=output_audio,
             mime="audio/wav"
         )
