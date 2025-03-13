@@ -1,28 +1,3 @@
-import subprocess
-import sys
-
-def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-def check_and_install(package):
-    try:
-        __import__(package)
-        print(f"Pacote {package} já está instalado.")
-    except ImportError:
-        print(f"Pacote {package} não está instalado. Instalando...")
-        install(package)
-
-# Lista de pacotes a serem verificados e instalados
-packages = {
-    #"streamlit": "streamlit",
-    "whisper": "openai-whisper",
-    "pydub": "pydub",
-    "docx": "python-docx"
-}
-
-for package, pip_name in packages.items():
-    check_and_install(pip_name)
-
 import streamlit as st
 import whisper
 from pydub import AudioSegment
@@ -71,4 +46,3 @@ if audio_files:
             file_name=docx_filename,
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
-
