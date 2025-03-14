@@ -1,6 +1,9 @@
 # File: app.py
 
 import streamlit
+import whisper # [!code ++]
+
+model = whisper.load_model("small") # [!code ++]
 
 stream_button_styles = """
 <style>
@@ -31,44 +34,6 @@ step_3 = "3. Transcription &nbsp; 🎉"
 def unsafe_html(tag, text):
     return streamlit.markdown(f"<{tag}>{text}</{tag}>", unsafe_allow_html=True)
 
-def main():
-    # Set title for the page
-    streamlit.set_page_config(page_title, layout="centered")
-    # Inject hide buttons CSS
-    streamlit.markdown(stream_button_styles, unsafe_allow_html=True)
-    # Inject page CSS
-    streamlit.markdown(page_styles, unsafe_allow_html=True)
-    # Create a H1 heading on the page
-    streamlit.title(page_title)
-    unsafe_html("h2", page_description)
-    unsafe_html("p", koyeb_box)
-    audio_file = streamlit.file_uploader(step_1, type=["mp3", "mp4", "wav", "m4a"])
-    if audio_file:
-        # If file is received
-        # Write the file on the server
-        # Show next step
-        unsafe_html("small", step_2)
-        if streamlit.button("Transcribe"):
-            # Get the transcription
-            unsafe_html("small", step_3)
-            # Showcase the transcription
-
-if __name__ == "__main__":
-    main()
-
-# File: app.py
-
-# Existing imports
-# . . .
-import whisper # [!code ++]
-
-model = whisper.load_model("small") # [!code ++]
-
-# ...
-
-def unsafe_html(tag, text):
-    # ...
-
 # Generate transcription of each segment
 def timestamp_html(segment): # [!code ++]
     return f'<span class="timestamp">[{segment["start"]:.2f} - {segment["end"]:.2f}]</span> {segment["text"]}' # [!code ++]
@@ -83,7 +48,17 @@ def write_audio(audio_file): # [!code ++]
         f.write(audio_file.read()) # [!code ++]
 
 def main():
-    # ...
+    # Set title for the page
+    streamlit.set_page_config(page_title, layout="centered")
+    # Inject hide buttons CSS
+    streamlit.markdown(stream_button_styles, unsafe_allow_html=True)
+    # Inject page CSS
+    streamlit.markdown(page_styles, unsafe_allow_html=True)
+    # Create a H1 heading on the page
+    streamlit.title(page_title)
+    unsafe_html("h2", page_description)
+    unsafe_html("p", koyeb_box)
+    audio_file = streamlit.file_uploader(step_1, type=["mp3", "mp4", "wav", "m4a"])
     if audio_file:
         # If file is received
         # Write the file on the server
