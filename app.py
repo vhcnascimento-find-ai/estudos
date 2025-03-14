@@ -2,9 +2,11 @@ import streamlit as st
 from pydub import AudioSegment
 import tempfile
 import os
+import imageio_ffmpeg  # Importar o FFmpeg instalado via pip
 
-# Configurar caminho do FFmpeg manualmente se necessário
-AudioSegment.converter = "ffmpeg"  # Substitua pelo caminho completo se necessário
+# Configurar FFmpeg do ambiente virtual
+FFMPEG_PATH = imageio_ffmpeg.get_ffmpeg_exe()
+AudioSegment.converter = FFMPEG_PATH
 
 st.title("Conversor de Áudio: OGG para WAV")
 
