@@ -1,7 +1,6 @@
 import streamlit as st
 import speech_recognition as sr
 from io import BytesIO
-import whisper
 
 # Inicializa o reconhecedor
 recognizer = sr.Recognizer()
@@ -21,20 +20,11 @@ if uploaded_file is not None:
         recognizer.adjust_for_ambient_noise(source)
         audio = recognizer.record(source)
 
-    # Transcreve o áudio usando Google Speech Recognition
+    # Transcreve o áudio
     try:
-        text_google = recognizer.recognize_google(audio)
-        st.write("Transcrição (Google Speech Recognition): ", text_google)
+        text = recognizer.recognize_google(audio)
+        st.write("Transcrição: ", text)
     except sr.UnknownValueError:
         st.write("Google Speech Recognition não conseguiu entender o áudio")
     except sr.RequestError as e:
         st.write(f"Erro ao solicitar resultados do serviço de reconhecimento de fala; {e}")
-
-    # Salva o áudio em um arquivo temporário para usar com Whisper
-#    with open("temp_audio.wav", "wb") as f:
-#        f.write(audio_data.getbuffer())
-
-    # Transcreve o áudio usando Whisper
-    model = whisper.load_model("base")
-    result = model.transcribe(audio)
-    st.write("Transcrição (Whisper): ", result["text"])
