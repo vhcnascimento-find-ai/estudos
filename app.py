@@ -1,16 +1,28 @@
 import streamlit as st
 import os
 import whisper
+import torch
+import asyncio
 from pydub import AudioSegment
 from docx import Document
 
+# Definir caminho para FFmpeg caso necessário
+AudioSegment.converter = "ffmpeg"
+
 def transcrever_audio(audio_file_path):
     try:
+        if not torch.cuda.is_available():
+            st.warning("GPU não detectada. O processo pode ser mais lento.")
+        
         model = whisper.load_model("small")
         sound = AudioSegment.from_file(audio_file_path)
         temp_wav_path = "temp_audio.wav"
         sound.export(temp_wav_path, format="wav")
-        result = model.transcribe(temp_wav_path)
+        
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result = loop.run_until_complete(asyncio.to_thread(model.transcribe, temp_wav_path))
+        
         os.remove(temp_wav_path)
         return result["text"]
     except FileNotFoundError as e:
