@@ -31,10 +31,10 @@ if uploaded_file is not None:
         st.write(f"Erro ao solicitar resultados do serviço de reconhecimento de fala; {e}")
 
     # Salva o áudio em um arquivo temporário para usar com Whisper
-    with open("temp_audio.wav", "wb") as f:
-        f.write(audio_data.getbuffer())
+#    with open("temp_audio.wav", "wb") as f:
+#        f.write(audio_data.getbuffer())
 
     # Transcreve o áudio usando Whisper
     model = whisper.load_model("base")
-    result = model.transcribe("temp_audio.wav")
+    result = model.transcribe(audio)
     st.write("Transcrição (Whisper): ", result["text"])
