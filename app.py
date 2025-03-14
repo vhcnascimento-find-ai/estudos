@@ -11,6 +11,9 @@ st.title("Transcrição de Áudio")
 uploaded_file = st.file_uploader("Escolha um arquivo de áudio", type=["wav", "mp3"])
 
 if uploaded_file is not None:
+    # Reproduzir o áudio carregado
+    st.audio(uploaded_file, format=f"audio/{uploaded_file.type.split('/')[-1]}")
+    
     # Converte o arquivo carregado para um formato que o SpeechRecognition pode usar
     audio_data = BytesIO(uploaded_file.read())
     audio_file = sr.AudioFile(audio_data)
