@@ -22,7 +22,7 @@ if uploaded_file is not None:
 
     # Transcreve o áudio com melhores configurações
     try:
-        text = recognizer.recognize_google(audio, language="pt-BR", show_all=True)
+        text = recognizer.recognize_google(audio, language="pt-BR")
         if text and isinstance(text, dict) and "alternative" in text:
             melhores_opcoes = [alt["transcript"] for alt in text["alternative"]]
             st.write("Melhores alternativas de transcrição:")
