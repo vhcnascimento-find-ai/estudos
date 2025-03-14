@@ -2,11 +2,15 @@ import streamlit as st
 from pydub import AudioSegment
 import tempfile
 import os
-import imageio_ffmpeg  # Importar o FFmpeg instalado via pip
+import ffmpeg  # Importar ffmpeg-python para verificar instalação
 
-# Configurar FFmpeg do ambiente virtual
-FFMPEG_PATH = imageio_ffmpeg.get_ffmpeg_exe()
-AudioSegment.converter = FFMPEG_PATH
+# Verificar e configurar FFmpeg
+try:
+    ffmpeg_path = ffmpeg.probe("ffmpeg")
+    AudioSegment.converter = "ffmpeg"
+    st.success("FFmpeg encontrado e configurado com sucesso!")
+except Exception as e:
+    st.error("Erro: FFmpeg não encontrado. Certifique-se de que ele está instalado no ambiente virtual.")
 
 st.title("Conversor de Áudio: OGG para WAV")
 
@@ -34,7 +38,8 @@ if uploaded_file is not None:
         with open(temp_wav_path, "rb") as f:
             st.download_button("Baixar arquivo WAV", f, file_name="convertido.wav", mime="audio/wav")
     except FileNotFoundError as e:
-        st.error("Erro: FFmpeg não encontrado. Certifique-se de que o FFmpeg está instalado e acessível.")
+        st.error("Erro ao processar o arquivo. Certifique-se de que o FFmpeg está instalado corretamente.")
+
 
 
 
