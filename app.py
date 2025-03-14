@@ -1,61 +1,28 @@
 import streamlit as st
-import os
-import whisper
-import torch
-import asyncio
-from pydub import AudioSegment
-from docx import Document
+import speech_recognition as sr
+from io import BytesIO
 
-# Definir caminho para FFmpeg caso necessário
-AudioSegment.converter = "ffmpeg"
+# Inicializa o reconhecedor
+recognizer = sr.Recognizer()
 
-def transcrever_audio(audio_file_path):
+st.title("Transcrição de Áudio")
+
+# Carrega o arquivo de áudio
+uploaded_file = st.file_uploader("Escolha um arquivo de áudio", type=["wav", "mp3"])
+
+if uploaded_file is not None:
+    # Converte o arquivo carregado para um formato que o SpeechRecognition pode usar
+    audio_data = BytesIO(uploaded_file.read())
+    audio_file = sr.AudioFile(audio_data)
+
+    with audio_file as source:
+        audio = recognizer.record(source)
+
+    # Transcreve o áudio
     try:
-        if not torch.cuda.is_available():
-            st.warning("GPU não detectada. O processo pode ser mais lento.")
-        
-        model = whisper.load_model("small")
-        sound = AudioSegment.from_file(audio_file_path)
-        temp_wav_path = "temp_audio.wav"
-        sound.export(temp_wav_path, format="wav")
-        
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        result = loop.run_until_complete(asyncio.to_thread(model.transcribe, temp_wav_path))
-        
-        os.remove(temp_wav_path)
-        return result["text"]
-    except FileNotFoundError as e:
-        st.error(f"Erro: Arquivo não encontrado - {e}")
-        return ""
-    except Exception as e:
-        st.error(f"Erro ao processar áudio: {e}")
-        return ""
-
-st.title("Transcrição de Áudio com Whisper")
-
-uploaded_files = st.file_uploader("Envie arquivos de áudio", type=["mp3", "wav", "ogg"], accept_multiple_files=True)
-
-if uploaded_files:
-    texto_transcrito = ""
-    for uploaded_file in uploaded_files:
-        st.write(f"Transcrevendo: {uploaded_file.name}")
-        temp_file_path = f"temp_{uploaded_file.name}"
-        with open(temp_file_path, "wb") as f:
-            f.write(uploaded_file.read())
-        texto = transcrever_audio(temp_file_path)
-        texto_transcrito += texto + "\n"
-        os.remove(temp_file_path)
-    
-    if texto_transcrito.strip():
-        st.text_area("Texto Transcrito", texto_transcrito, height=300)
-        
-        doc = Document()
-        doc.add_paragraph(texto_transcrito)
-        doc_path = "transcricao.docx"
-        doc.save(doc_path)
-        
-        with open(doc_path, "rb") as f:
-            st.download_button("Baixar Transcrição", f, file_name="transcricao.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-    else:
-        st.warning("Nenhum texto foi transcrito. Verifique os arquivos de áudio e tente novamente.")
+        text = recognizer.recognize_google(audio)
+        st.write("Transcrição: ", text)
+    except sr.UnknownValueError:
+        st.write("Google Speech Recognition não conseguiu entender o áudio")
+    except sr.RequestError as e:
+        st.write(f"Erro ao solicitar resultados do serviço de reconhecimento de fala; {e}")
