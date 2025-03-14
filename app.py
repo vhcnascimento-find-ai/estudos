@@ -1,6 +1,6 @@
 import streamlit as st
+import soundfile as sf
 import wave
-import audioread
 import tempfile
 
 st.title("Conversor de Áudio: OGG para WAV")
@@ -20,21 +20,19 @@ if uploaded_file is not None:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav:
         temp_wav_path = temp_wav.name
     
-    # Ler o arquivo OGG e converter para WAV
-    with audioread.audio_open(temp_ogg_path) as input_audio:
-        with wave.open(temp_wav_path, "wb") as output_audio:
-            output_audio.setnchannels(input_audio.channels)
-            output_audio.setsampwidth(2)  # Definir 16 bits (2 bytes)
-            output_audio.setframerate(input_audio.samplerate)
-            
-            for buffer in input_audio:
-                output_audio.writeframes(buffer)
-    
-    st.success("Conversão concluída!")
-    st.audio(temp_wav_path, format="audio/wav")
-    
-    with open(temp_wav_path, "rb") as f:
-        st.download_button("Baixar arquivo WAV", f, file_name="convertido.wav", mime="audio/wav")
+    try:
+        # Ler o arquivo OGG e converter para WAV
+        data, samplerate = sf.read(temp_ogg_path)
+        sf.write(temp_wav_path, data, samplerate, format='WAV')
+        
+        st.success("Conversão concluída!")
+        st.audio(temp_wav_path, format="audio/wav")
+        
+        with open(temp_wav_path, "rb") as f:
+            st.download_button("Baixar arquivo WAV", f, file_name="convertido.wav", mime="audio/wav")
+    except Exception as e:
+        st.error(f"Erro ao processar o arquivo: {e}")
+
 
 
 
