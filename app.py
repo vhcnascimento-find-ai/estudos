@@ -16,14 +16,20 @@ if uploaded_file is not None:
     audio_file = sr.AudioFile(audio_data)
 
     with audio_file as source:
-        # Ajusta o nível de ruído
-        recognizer.adjust_for_ambient_noise(source)
+        # Ajusta o nível de ruído por mais tempo para melhorar a precisão
+        recognizer.adjust_for_ambient_noise(source, duration=1.5)
         audio = recognizer.record(source)
 
-    # Transcreve o áudio
+    # Transcreve o áudio com melhores configurações
     try:
-        text = recognizer.recognize_google(audio)
-        st.write("Transcrição: ", text)
+        text = recognizer.recognize_google(audio, language="pt-BR", show_all=True)
+        if text and isinstance(text, dict) and "alternative" in text:
+            melhores_opcoes = [alt["transcript"] for alt in text["alternative"]]
+            st.write("Melhores alternativas de transcrição:")
+            for opcao in melhores_opcoes:
+                st.write(f"- {opcao}")
+        else:
+            st.write("Transcrição: ", text)
     except sr.UnknownValueError:
         st.write("Google Speech Recognition não conseguiu entender o áudio")
     except sr.RequestError as e:
