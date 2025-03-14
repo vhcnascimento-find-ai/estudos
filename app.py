@@ -21,7 +21,7 @@ if uploaded_file is not None:
 
         with audio_file as source:
             # Ajusta o nível de ruído por mais tempo para melhorar a precisão
-            recognizer.adjust_for_ambient_noise(source, duration=1.5)
+            recognizer.adjust_for_ambient_noise(source, duration=1)
             audio = recognizer.record(source)
 
         # Transcreve o áudio com melhores configurações
