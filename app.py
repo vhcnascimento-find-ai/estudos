@@ -1,43 +1,57 @@
-import streamlit as st
-import os
+# File: app.py
 
-# Instala a biblioteca SpeechRecognition se não estiver instalada
-try:
-    import speech_recognition as sr
-except ImportError:
-    import subprocess
-    subprocess.check_call(["pip", "install", "SpeechRecognition"])
-    import speech_recognition as sr
+import streamlit
 
-st.title('Reprodução e Transcrição de Áudio .wav')
+stream_button_styles = """
+<style>
+    header { display: none !important; }
+</style>
+"""
 
-# Adiciona um botão para upload de um único arquivo de áudio .wav
-audio_file_wav = st.file_uploader("Anexe um arquivo de áudio .wav", type=["wav"])
+page_styles = """
+<style>
+    h1 { font-size: 2rem; font-weight: 700; }
+    h2 { font-size: 1.7rem; font-weight: 600; }
+    .timestamp { color: gray; font-size: 0.9rem; }
+</style>
+"""
 
-if audio_file_wav:
-    st.write(f"Arquivo enviado: {audio_file_wav.name}")
-    st.audio(audio_file_wav, format='audio/wav')
-    
-    # Salva o arquivo de áudio enviado
-    with open("uploaded_audio.wav", "wb") as f:
-        f.write(audio_file_wav.getbuffer())
-    
-    # Verifica se o arquivo foi salvo corretamente
-    if os.path.exists("uploaded_audio.wav"):
-        st.success("Arquivo de áudio salvo com sucesso!")
-        
-        # Transcreve o áudio usando a biblioteca SpeechRecognition
-        recognizer = sr.Recognizer()
-        with sr.AudioFile("uploaded_audio.wav") as source:
-            audio_data = recognizer.record(source)
-            try:
-                texto_transcrito = recognizer.recognize_google(audio_data, language="pt-BR")
-            except sr.UnknownValueError:
-                texto_transcrito = "Não foi possível transcrever o áudio."
-            except sr.RequestError as e:
-                texto_transcrito = f"Erro na solicitação ao serviço de reconhecimento de fala: {e}"
-        
-        # Exibe o texto transcrito na tela
-        st.text_area("Texto Transcrito", texto_transcrito, height=300)
-    else:
-        st.error("Erro ao salvar o arquivo de áudio.")
+page_title = "Using OpenAI Whisper to Transcribe Podcasts"
+
+page_description = "A demo showcasing the use of OpenAI Whisper to accurately and efficiently convert spoken content from podcasts into written text."
+
+koyeb_box = "To deploy Whisper within minutes, <a href=\"https://koyeb.com/ai\">Koyeb GPUs</a> provide the easiest and most efficient way. Koyeb offers a seamless platform for deploying AI models, leveraging high-performance GPUs to ensure fast and reliable transcriptions."
+
+step_1 = "1. Upload Podcast"
+
+step_2 = "2. Invoke OpenAI Whisper to transcribe podcast 👇🏻"
+
+step_3 = "3. Transcription &nbsp; 🎉"
+
+def unsafe_html(tag, text):
+    return streamlit.markdown(f"<{tag}>{text}</{tag}>", unsafe_allow_html=True)
+
+def main():
+    # Set title for the page
+    streamlit.set_page_config(page_title, layout="centered")
+    # Inject hide buttons CSS
+    streamlit.markdown(stream_button_styles, unsafe_allow_html=True)
+    # Inject page CSS
+    streamlit.markdown(page_styles, unsafe_allow_html=True)
+    # Create a H1 heading on the page
+    streamlit.title(page_title)
+    unsafe_html("h2", page_description)
+    unsafe_html("p", koyeb_box)
+    audio_file = streamlit.file_uploader(step_1, type=["mp3", "mp4", "wav", "m4a"])
+    if audio_file:
+        # If file is received
+        # Write the file on the server
+        # Show next step
+        unsafe_html("small", step_2)
+        if streamlit.button("Transcribe"):
+            # Get the transcription
+            unsafe_html("small", step_3)
+            # Showcase the transcription
+
+if __name__ == "__main__":
+    main()
