@@ -1,16 +1,7 @@
 import streamlit as st
-from pydub import AudioSegment
+import wave
+import audioread
 import tempfile
-import os
-import ffmpeg  # Importar ffmpeg-python para verificar instalação
-
-# Verificar e configurar FFmpeg
-try:
-    ffmpeg_path = ffmpeg.probe("ffmpeg")
-    AudioSegment.converter = "ffmpeg"
-    st.success("FFmpeg encontrado e configurado com sucesso!")
-except Exception as e:
-    st.error("Erro: FFmpeg não encontrado. Certifique-se de que ele está instalado no ambiente virtual.")
 
 st.title("Conversor de Áudio: OGG para WAV")
 
@@ -25,21 +16,28 @@ if uploaded_file is not None:
         temp_ogg.write(uploaded_file.read())
         temp_ogg_path = temp_ogg.name
     
+    # Criar um arquivo temporário para armazenar o .wav
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav:
+        temp_wav_path = temp_wav.name
+    
     try:
-        # Converter para WAV
-        audio = AudioSegment.from_file(temp_ogg_path, format="ogg")
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav:
-            audio.export(temp_wav.name, format="wav")
-            temp_wav_path = temp_wav.name
+        # Ler o arquivo OGG e converter para WAV
+        with audioread.audio_open(temp_ogg_path) as input_audio:
+            with wave.open(temp_wav_path, "wb") as output_audio:
+                output_audio.setnchannels(input_audio.channels)
+                output_audio.setsampwidth(2)  # Definir 16 bits (2 bytes)
+                output_audio.setframerate(input_audio.samplerate)
+                
+                for buffer in input_audio:
+                    output_audio.writeframes(buffer)
         
         st.success("Conversão concluída!")
         st.audio(temp_wav_path, format="audio/wav")
         
         with open(temp_wav_path, "rb") as f:
             st.download_button("Baixar arquivo WAV", f, file_name="convertido.wav", mime="audio/wav")
-    except FileNotFoundError as e:
-        st.error("Erro ao processar o arquivo. Certifique-se de que o FFmpeg está instalado corretamente.")
-
+    except Exception as e:
+        st.error(f"Erro ao processar o arquivo: {e}")
 
 
 
