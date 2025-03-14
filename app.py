@@ -16,6 +16,8 @@ if uploaded_file is not None:
     audio_file = sr.AudioFile(audio_data)
 
     with audio_file as source:
+        # Ajusta o nível de ruído
+        recognizer.adjust_for_ambient_noise(source)
         audio = recognizer.record(source)
 
     # Transcreve o áudio
