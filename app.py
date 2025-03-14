@@ -55,3 +55,48 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# File: app.py
+
+# Existing imports
+# . . .
+import whisper # [!code ++]
+
+model = whisper.load_model("small") # [!code ++]
+
+# ...
+
+def unsafe_html(tag, text):
+    # ...
+
+# Generate transcription of each segment
+def timestamp_html(segment): # [!code ++]
+    return f'<span class="timestamp">[{segment["start"]:.2f} - {segment["end"]:.2f}]</span> {segment["text"]}' # [!code ++]
+
+# Transcribe an audio file
+def transcribe_audio(audio_file): # [!code ++]
+    return model.transcribe(audio_file.name) # [!code ++]
+
+# Write the audio file on server
+def write_audio(audio_file): # [!code ++]
+    with open(audio_file.name, "wb") as f: # [!code ++]
+        f.write(audio_file.read()) # [!code ++]
+
+def main():
+    # ...
+    if audio_file:
+        # If file is received
+        # Write the file on the server
+        write_audio(audio_file) # [!code ++]
+        # Show next step
+        unsafe_html("small", step_2)
+        if streamlit.button("Transcribe"):
+            # Get the transcription
+            transcript_text = transcribe_audio(audio_file) # [!code ++]
+            unsafe_html("small", step_3)
+            # Showcase the transcription
+            for segment in transcript_text["segments"]: # [!code ++]
+                unsafe_html("div", timestamp_html(segment)) # [!code ++]
+
+if __name__ == "__main__":
+    main()
