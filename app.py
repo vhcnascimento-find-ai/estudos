@@ -1,6 +1,10 @@
 import streamlit as st
 from pydub import AudioSegment
 import tempfile
+import os
+
+# Configurar caminho do FFmpeg manualmente se necessário
+AudioSegment.converter = "ffmpeg"  # Substitua pelo caminho completo se necessário
 
 st.title("Conversor de Áudio: OGG para WAV")
 
@@ -15,17 +19,21 @@ if uploaded_file is not None:
         temp_ogg.write(uploaded_file.read())
         temp_ogg_path = temp_ogg.name
     
-    # Converter para WAV
-    audio = AudioSegment.from_file(temp_ogg_path, format="ogg")
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav:
-        audio.export(temp_wav.name, format="wav")
-        temp_wav_path = temp_wav.name
-    
-    st.success("Conversão concluída!")
-    st.audio(temp_wav_path, format="audio/wav")
-    
-    with open(temp_wav_path, "rb") as f:
-        st.download_button("Baixar arquivo WAV", f, file_name="convertido.wav", mime="audio/wav")
+    try:
+        # Converter para WAV
+        audio = AudioSegment.from_file(temp_ogg_path, format="ogg")
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_wav:
+            audio.export(temp_wav.name, format="wav")
+            temp_wav_path = temp_wav.name
+        
+        st.success("Conversão concluída!")
+        st.audio(temp_wav_path, format="audio/wav")
+        
+        with open(temp_wav_path, "rb") as f:
+            st.download_button("Baixar arquivo WAV", f, file_name="convertido.wav", mime="audio/wav")
+    except FileNotFoundError as e:
+        st.error("Erro: FFmpeg não encontrado. Certifique-se de que o FFmpeg está instalado e acessível.")
+
 
 
 
