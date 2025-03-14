@@ -1,30 +1,33 @@
-import os
-from dotenv import load_dotenv
-from openai import OpenAI
-
-load_dotenv()
-
-api_key = os.getenv('OPENAI_API_KEY')
-
-client = OpenAI()
-
 import streamlit as st
+import os
+import whisper
+from pydub import AudioSegment
+from docx import Document
 
-st.logo(
-  "logo.png",
-  size="medium",
-  link="https://platform.openai.com/docs",
-)
+def transcrever_audio(audio_file):
+    model = whisper.load_model("small")
+    sound = AudioSegment.from_file(audio_file)
+    sound.export("audio.wav", format="wav")
+    result = model.transcribe("audio.wav")
+    return result["text"]
 
-st.title("Transcription with Whisper")
+st.title("Transcrição de Áudio com Whisper")
 
-audio_value = st.audio_input("record a voice message to transcribe")
+uploaded_files = st.file_uploader("Envie arquivos de áudio", type=["mp3", "wav", "ogg"], accept_multiple_files=True)
 
-if audio_value:
-  transcript = client.audio.transcriptions.create(
-    model="whisper-1",
-    file = audio_value
-  )
-
-  transcript_text = transcript.text
-  st.write(transcript_text)
+if uploaded_files:
+    texto_transcrito = ""
+    for audio_file in uploaded_files:
+        st.write(f"Transcrevendo: {audio_file.name}")
+        texto = transcrever_audio(audio_file)
+        texto_transcrito += texto + "\n"
+    
+    st.text_area("Texto Transcrito", texto_transcrito, height=300)
+    
+    doc = Document()
+    doc.add_paragraph(texto_transcrito)
+    doc_path = "transcricao.docx"
+    doc.save(doc_path)
+    
+    with open(doc_path, "rb") as f:
+        st.download_button("Baixar Transcrição", f, file_name="transcricao.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
