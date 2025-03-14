@@ -23,13 +23,7 @@ if uploaded_file is not None:
     # Transcreve o áudio com melhores configurações
     try:
         text = recognizer.recognize_google(audio, language="pt-BR")
-        if text and isinstance(text, dict) and "alternative" in text:
-            melhores_opcoes = [alt["transcript"] for alt in text["alternative"]]
-            st.write("Melhores alternativas de transcrição:")
-            for opcao in melhores_opcoes:
-                st.write(f"- {opcao}")
-        else:
-            st.write("Transcrição: ", text)
+        st.write("Transcrição: ", text)
     except sr.UnknownValueError:
         st.write("Google Speech Recognition não conseguiu entender o áudio")
     except sr.RequestError as e:
