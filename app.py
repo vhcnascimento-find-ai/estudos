@@ -58,15 +58,13 @@ if uploaded_file is not None:
 
 # Adiciona botão para exportar a transcrição para Word se a transcrição estiver disponível
 if "transcription" in st.session_state:
-    if st.button("Exportar Transcrição para Word"):
-        doc = Document()
-        doc.add_heading('Transcrição de Áudio', 0)
-        doc.add_paragraph(st.session_state.transcription)
-        
-        # Salva o documento temporariamente
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as temp_docx:
-            doc.save(temp_docx.name)
-            temp_docx_path = temp_docx.name
-        
-        with open(temp_docx_path, "rb") as f:
-            st.download_button("Baixar Transcrição", f, file_name="transcricao.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    doc = Document()
+    doc.add_paragraph(st.session_state.transcription)
+    
+    # Salva o documento temporariamente
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as temp_docx:
+        doc.save(temp_docx.name)
+        temp_docx_path = temp_docx.name
+    
+    with open(temp_docx_path, "rb") as f:
+        st.download_button("Exportar Transcrição para Word", f, file_name="transcricao.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
