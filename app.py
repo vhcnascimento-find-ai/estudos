@@ -30,9 +30,6 @@ if uploaded_file is not None:
         st.success("Conversão concluída!")
         st.audio(temp_wav_path, format="audio/wav")
         
-        with open(temp_wav_path, "rb") as f:
-            st.download_button("Baixar arquivo WAV", f, file_name="convertido.wav", mime="audio/wav")
-        
         if st.button("Iniciar Transcrição"):
             # Inicializa o reconhecedor
             recognizer = sr.Recognizer()
@@ -44,7 +41,7 @@ if uploaded_file is not None:
 
                 with audio_file as source:
                     # Ajusta o nível de ruído por mais tempo para melhorar a precisão
-                    recognizer.adjust_for_ambient_noise(source, duration=1.5)
+                    recognizer.adjust_for_ambient_noise(source, duration=1)
                     audio = recognizer.record(source)
 
                 # Transcreve o áudio com melhores configurações
