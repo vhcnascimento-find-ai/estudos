@@ -3,6 +3,7 @@ import soundfile as sf
 import tempfile
 import speech_recognition as sr
 from io import BytesIO
+from docx import Document
 
 st.title("Conversor e Transcritor de Áudio: OGG para WAV")
 
@@ -50,6 +51,20 @@ if uploaded_file is not None:
                 try:
                     text = recognizer.recognize_google(audio, language="pt-BR")
                     st.write("Transcrição: ", text)
+                    
+                    # Adiciona botão para exportar a transcrição para Word
+                    if st.button("Exportar Transcrição para Word"):
+                        doc = Document()
+                        doc.add_heading('Transcrição de Áudio', 0)
+                        doc.add_paragraph(text)
+                        
+                        # Salva o documento temporariamente
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as temp_docx:
+                            doc.save(temp_docx.name)
+                            temp_docx_path = temp_docx.name
+                        
+                        with open(temp_docx_path, "rb") as f:
+                            st.download_button("Baixar Transcrição", f, file_name="transcricao.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
                 except sr.UnknownValueError:
                     st.write("Google Speech Recognition não conseguiu entender o áudio")
                 except sr.RequestError as e:
