@@ -58,7 +58,8 @@ if uploaded_file is not None:
 
 # Adiciona campo de texto para o nome do arquivo e botão para exportar a transcrição para Word se a transcrição estiver disponível
 if "transcription" in st.session_state:
-    file_name = st.text_input("Nome do arquivo Word (sem extensão)", "transcricao")
+    file_name = st.text_input("Nome do arquivo Word (sem extensão)", "Transcrição")
+    st.markdown('<p style="color:yellow;"><i class="fas fa-exclamation-triangle"></i> Aperte enter para confirmar o nome do arquivo</p>', unsafe_allow_html=True)
     doc = Document()
     doc.add_paragraph(st.session_state.transcription)
     
