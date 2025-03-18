@@ -6,7 +6,7 @@ from io import BytesIO
 from docx import Document
 import time
 
-st.title("Conversor e Transcritor de Áudio: OGG para WAV")
+st.title("Transcritor de Áudio: OGG para WAV")
 
 # Função para dividir o áudio em segmentos menores
 def divide_audio(file_path, segment_length=60):
