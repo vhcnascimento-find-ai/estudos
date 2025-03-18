@@ -4,8 +4,20 @@ import tempfile
 import speech_recognition as sr
 from io import BytesIO
 from docx import Document
+import time
 
 st.title("Conversor e Transcritor de Áudio: OGG para WAV")
+
+# Função para dividir o áudio em segmentos menores
+def divide_audio(file_path, segment_length=60):
+    data, samplerate = sf.read(file_path)
+    total_length = len(data) / samplerate
+    segments = []
+    for start in range(0, int(total_length), segment_length):
+        end = start + segment_length
+        segment = data[start * samplerate:end * samplerate]
+        segments.append(segment)
+    return segments, samplerate
 
 # Upload do arquivo
 uploaded_file = st.file_uploader("Escolha um arquivo .ogg", type=["ogg"])
@@ -27,32 +39,42 @@ if uploaded_file is not None:
         data, samplerate = sf.read(temp_ogg_path)
         sf.write(temp_wav_path, data, samplerate, format='WAV')
         
-        st.success("Conversão concluída!")
+        st.write("Conversão concluída!")
         st.audio(temp_wav_path, format="audio/wav")
+        st.write("*A transcrição pode levar um tempo equivalente à duração do áudio. Por favor, aguarde!")
         
         if st.button("Iniciar Transcrição"):
             # Inicializa o reconhecedor
             recognizer = sr.Recognizer()
             
-            # Converte o arquivo carregado para um formato que o SpeechRecognition pode usar
-            with open(temp_wav_path, "rb") as audio_file:
-                audio_data = BytesIO(audio_file.read())
-                audio_file = sr.AudioFile(audio_data)
-
-                with audio_file as source:
-                    # Ajusta o nível de ruído por mais tempo para melhorar a precisão
-                    recognizer.adjust_for_ambient_noise(source, duration=1)
-                    audio = recognizer.record(source)
-
-                # Transcreve o áudio com melhores configurações
-                try:
-                    text = recognizer.recognize_google(audio, language="pt-BR")
-                    st.session_state.transcription = text
-                    st.write("Transcrição: ", text)
-                except sr.UnknownValueError:
-                    st.write("Google Speech Recognition não conseguiu entender o áudio")
-                except sr.RequestError as e:
-                    st.write(f"Erro ao solicitar resultados do serviço de reconhecimento de fala; {e}")
+            # Divide o áudio em segmentos menores
+            segments, samplerate = divide_audio(temp_wav_path)
+            transcription = ""
+            
+            start_time = time.time()  # Início da medição do tempo
+            
+            for i, segment in enumerate(segments):
+                st.write(f"Transcrevendo o segmento {i + 1} de {len(segments)}")
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_segment:
+                    sf.write(temp_segment.name, segment, samplerate, format='WAV')
+                    with sr.AudioFile(temp_segment.name) as source:
+                        audio = recognizer.record(source)
+                        try:
+                            text = recognizer.recognize_google(audio, language="pt-BR")
+                            transcription += text + " "
+                        except sr.UnknownValueError:
+                            st.write("Google Speech Recognition não conseguiu entender o áudio")
+                        except sr.RequestError as e:
+                            st.write(f"Erro ao solicitar resultados do serviço de reconhecimento de fala; {e}")
+            
+            end_time = time.time()  # Fim da medição do tempo
+            transcription_time = end_time - start_time
+            transcription_minutes = transcription_time // 60
+            transcription_seconds = transcription_time % 60
+            st.write(f"Tempo de transcrição: {int(transcription_minutes)} minutos e {int(transcription_seconds)} segundos")
+            
+            st.session_state.transcription = transcription
+            st.write("Transcrição: ", transcription)
     except Exception as e:
         st.error(f"Erro ao processar o arquivo: {e}")
 
