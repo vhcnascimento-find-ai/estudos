@@ -6,7 +6,7 @@ from io import BytesIO
 from docx import Document
 import time
 
-st.title("Transcritor de Áudio: OGG para WAV")
+st.title("Conversor e Transcritor de Áudio: OGG para WAV")
 
 # Função para dividir o áudio em segmentos menores
 def divide_audio(file_path, segment_length=60):
@@ -51,10 +51,14 @@ if uploaded_file is not None:
             segments, samplerate = divide_audio(temp_wav_path)
             transcription = ""
             
+            st.write(f"O áudio foi dividido em {len(segments)} segmento(s)")
+            
             start_time = time.time()  # Início da medição do tempo
             
+            progress_bar = st.progress(0)
+            progress_text = st.empty()
+            
             for i, segment in enumerate(segments):
-                st.write(f"Transcrevendo o segmento {i + 1} de {len(segments)}")
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_segment:
                     sf.write(temp_segment.name, segment, samplerate, format='WAV')
                     with sr.AudioFile(temp_segment.name) as source:
@@ -63,9 +67,14 @@ if uploaded_file is not None:
                             text = recognizer.recognize_google(audio, language="pt-BR")
                             transcription += text + " "
                         except sr.UnknownValueError:
-                            st.write("Google Speech Recognition não conseguiu entender o áudio")
+                            st.write(f"Google Speech Recognition não conseguiu entender o segmento {i + 1}")
                         except sr.RequestError as e:
                             st.write(f"Erro ao solicitar resultados do serviço de reconhecimento de fala; {e}")
+                
+                # Atualiza a barra de progresso e o texto
+                progress = (i + 1) / len(segments)
+                progress_bar.progress(progress)
+                progress_text.text(f"Progresso: {int(progress * 100)}%")
             
             end_time = time.time()  # Fim da medição do tempo
             transcription_time = end_time - start_time
